@@ -1,6 +1,6 @@
 [package]
 name = "leeway-cli"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 license = "MIT"
 description = "Launch your coding agent through the LeewayLLM gateway - same model, less context, receipts for every request."
