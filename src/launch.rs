@@ -267,7 +267,15 @@ mod tests {
             ("ANTHROPIC_BASE_URL", "https://other"),
             ("ANTHROPIC_AUTH_TOKEN", "tok"),
         ]);
-        let env = managed_env("https://gw", "lwllm_x", "safe", "s", "0.1.0", "d", &existing);
+        let env = managed_env(
+            "https://gw",
+            "lwllm_x",
+            "safe",
+            "s",
+            "0.1.0",
+            "d",
+            &existing,
+        );
         assert_eq!(env.warnings.len(), 2);
         assert!(env.remove.contains(&"ANTHROPIC_AUTH_TOKEN".to_string()));
     }

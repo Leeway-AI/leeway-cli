@@ -145,7 +145,12 @@ pub fn cli_auth_start(gateway: &str, timeout: Duration) -> Result<CliAuthStart> 
     serde_json::from_str(&body).context("unexpected sign-in start response shape")
 }
 
-pub fn cli_auth_poll(gateway: &str, code: &str, secret: &str, timeout: Duration) -> Result<CliAuthPoll> {
+pub fn cli_auth_poll(
+    gateway: &str,
+    code: &str,
+    secret: &str,
+    timeout: Duration,
+) -> Result<CliAuthPoll> {
     let url = format!("{}/app/api/cli/auth/poll", gateway.trim_end_matches('/'));
     let res = client(timeout)?
         .post(url)
@@ -166,7 +171,8 @@ pub fn cli_auth_poll(gateway: &str, code: &str, secret: &str, timeout: Duration)
         #[serde(rename = "apiKey")]
         api_key: Option<String>,
     }
-    let poll: Poll = serde_json::from_str(&body).context("unexpected sign-in poll response shape")?;
+    let poll: Poll =
+        serde_json::from_str(&body).context("unexpected sign-in poll response shape")?;
     match (poll.status.as_str(), poll.api_key) {
         ("approved", Some(api_key)) => Ok(CliAuthPoll::Approved { api_key }),
         _ => Ok(CliAuthPoll::Pending),

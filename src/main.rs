@@ -69,15 +69,24 @@ fn cmd_auth(gateway: Option<String>, auth: Option<AuthChoice>) -> Result<()> {
 fn open_browser(url: &str) -> std::io::Result<()> {
     #[cfg(target_os = "windows")]
     {
-        std::process::Command::new("cmd").args(["/C", "start", "", url]).spawn().map(|_| ())
+        std::process::Command::new("cmd")
+            .args(["/C", "start", "", url])
+            .spawn()
+            .map(|_| ())
     }
     #[cfg(target_os = "macos")]
     {
-        std::process::Command::new("open").arg(url).spawn().map(|_| ())
+        std::process::Command::new("open")
+            .arg(url)
+            .spawn()
+            .map(|_| ())
     }
     #[cfg(all(unix, not(target_os = "macos")))]
     {
-        std::process::Command::new("xdg-open").arg(url).spawn().map(|_| ())
+        std::process::Command::new("xdg-open")
+            .arg(url)
+            .spawn()
+            .map(|_| ())
     }
 }
 
@@ -99,7 +108,12 @@ fn cmd_login(key: Option<String>, gateway: Option<String>, auth: Option<AuthChoi
 
 /// Shared tail of `leeway auth` and `leeway login`: verify the key against
 /// the gateway, store it, pick the billing mode.
-fn finish_login(mut cfg: config::Config, gateway: String, key: String, auth: Option<AuthChoice>) -> Result<()> {
+fn finish_login(
+    mut cfg: config::Config,
+    gateway: String,
+    key: String,
+    auth: Option<AuthChoice>,
+) -> Result<()> {
     let info = api::key_info(&gateway, &key, Duration::from_secs(10))?;
     println!(
         "✓ signed in — plan: {} · key: {}",
@@ -178,7 +192,9 @@ Subscription mode notice
 /// party) — fail-silent, 2s budget, never blocks or delays the session
 /// beyond that. auto_update=true additionally runs the GitHub self-update.
 fn maybe_check_update(cfg: &config::Config, gateway: &str) {
-    let Ok(dir) = config::config_dir() else { return };
+    let Ok(dir) = config::config_dir() else {
+        return;
+    };
     if !config::update_check_due(&dir, 86_400) {
         return;
     }
@@ -245,7 +261,13 @@ fn cmd_launch(args: LaunchArgs) -> Result<i32> {
     match auth {
         AuthChoice::Managed => {
             let env = launch::managed_env(
-                &gateway, &api_key, &mode, &session, CLI_VERSION, &device, &real_env,
+                &gateway,
+                &api_key,
+                &mode,
+                &session,
+                CLI_VERSION,
+                &device,
+                &real_env,
             );
             if args.print_env {
                 print_env_plan("managed", &env, target_name, target_args, None);

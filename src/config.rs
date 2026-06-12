@@ -138,7 +138,13 @@ fn now_secs() -> u64 {
 pub fn is_newer_version(candidate: &str, current: &str) -> bool {
     let parse = |s: &str| -> [u64; 3] {
         let mut parts = [0u64; 3];
-        for (i, p) in s.trim().trim_start_matches('v').split('.').take(3).enumerate() {
+        for (i, p) in s
+            .trim()
+            .trim_start_matches('v')
+            .split('.')
+            .take(3)
+            .enumerate()
+        {
             parts[i] = p.parse().unwrap_or(0);
         }
         parts
