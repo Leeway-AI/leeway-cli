@@ -1,0 +1,48 @@
+[package]
+name = "leeway-cli"
+version = "1.0.0"
+edition = "2021"
+license = "MIT"
+description = "Launch your coding agent through the LeewayLLM gateway - same model, less context, receipts for every request."
+homepage = "https://leewayai.app"
+repository = "https://github.com/Leeway-AI/leeway-cli"
+
+[[bin]]
+name = "leeway"
+path = "src/main.rs"
+
+[lib]
+name = "leeway_cli"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1"
+axum = "0.8"
+bytes = "1"
+clap = { version = "4.5", features = ["derive"] }
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream", "blocking"] }
+rpassword = "7"
+self_update = { version = "0.41", default-features = false, features = ["rustls", "archive-tar", "archive-zip", "compression-flate2"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util"] }
+toml = "0.8"
+uuid = { version = "1", features = ["v4"] }
+which = "7"
+ctrlc = "3"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = true
+strip = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+
+[package.metadata.dist]
+# brew install leeway-ai/tap/leeway (not .../leeway-cli)
+formula = "leeway"
