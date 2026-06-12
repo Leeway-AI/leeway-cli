@@ -106,53 +106,60 @@ fn cmd_login(key: Option<String>, gateway: Option<String>, auth: Option<AuthChoi
     finish_login(cfg, gateway, key, auth)
 }
 
-/// Shared tail of `leeway auth` and `leeway login`: verify the key against
-/// the gateway, store it, pick the billing mode.
+/// Shared tail of `leeway auth` and `leeway login`: store the key FIRST, then
+/// verify against the gateway best-effort. By the time we get here the key
+/// already exists on the account — a flaky verification call (gateway
+/// redeploying, transient network) must never strand it.
 fn finish_login(
     mut cfg: config::Config,
     gateway: String,
     key: String,
     auth: Option<AuthChoice>,
 ) -> Result<()> {
-    let info = api::key_info(&gateway, &key, Duration::from_secs(10))?;
-    println!(
-        "✓ signed in — plan: {} · key: {}",
-        info.plan, info.masked_key
-    );
-    let dashboard = config::dashboard_url(&gateway);
-    if info.plan == "developer" {
-        match &info.trial {
-            Some(t) if t.active => println!(
-                "  developer trial: {} requests / {} days left — upgrade for full access: {dashboard}/app/billing",
-                t.remaining_requests, t.days_left
-            ),
-            _ => println!(
-                "  the developer plan has no gateway access left — upgrade at {dashboard}/app/billing"
-            ),
-        }
-    }
-
-    // store the key regardless of plan — dashboard/receipts still work
-    cfg.api_key = Some(key);
+    cfg.api_key = Some(key.clone());
     cfg.gateway_url = Some(gateway.clone());
-
     let auth = match auth {
         Some(a) => a,
         None => ask_auth_choice()?,
     };
     cfg.default_auth = Some(auth.as_str().to_string());
-
-    if auth == AuthChoice::Managed && !info.byok_providers.iter().any(|p| p == "anthropic") {
-        println!(
-            "⚠ no Anthropic key is stored on your Leeway account. If this gateway is hosted,\n  requests will 401 — add one in Settings → Provider keys (BYOK): {dashboard}/app/settings"
-        );
-    }
-
     config::save(&cfg)?;
     println!(
         "✓ saved {}",
         config::config_dir()?.join("config.toml").display()
     );
+
+    let dashboard = config::dashboard_url(&gateway);
+    match api::key_info(&gateway, &key, Duration::from_secs(10)) {
+        Ok(info) => {
+            println!(
+                "✓ signed in — plan: {} · key: {}",
+                info.plan, info.masked_key
+            );
+            if info.plan == "developer" {
+                match &info.trial {
+                    Some(t) if t.active => println!(
+                        "  developer trial: {} requests / {} days left — upgrade for full access: {dashboard}/app/billing",
+                        t.remaining_requests, t.days_left
+                    ),
+                    _ => println!(
+                        "  the developer plan has no gateway access left — upgrade at {dashboard}/app/billing"
+                    ),
+                }
+            }
+            if auth == AuthChoice::Managed && !info.byok_providers.iter().any(|p| p == "anthropic")
+            {
+                println!(
+                    "⚠ no Anthropic key is stored on your Leeway account. If this gateway is hosted,\n  requests will 401 — add one in Settings → Provider keys (BYOK): {dashboard}/app/settings"
+                );
+            }
+        }
+        Err(err) => {
+            println!(
+                "⚠ key saved, but the gateway could not confirm it right now ({err})\n  run `leeway status` in a minute to verify."
+            );
+        }
+    }
     Ok(())
 }
 
