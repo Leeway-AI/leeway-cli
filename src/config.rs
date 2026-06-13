@@ -89,7 +89,7 @@ pub fn config_dir() -> Result<PathBuf> {
 
 /// Stable anonymous device id, generated once and persisted next to the
 /// config. Lets the gateway count SIMULTANEOUS devices on one account (plan
-/// seats: Pro 1, Max 10). Pure random token — no hardware or personal data.
+/// seats: Pro 1, Max 5). Pure random token — no hardware or personal data.
 pub fn device_id() -> Result<String> {
     device_id_from(&config_dir()?)
 }

@@ -28,6 +28,10 @@ leeway launch claude --resume abc -p "fix the bug"
 ```
 
 `leeway auth` opens your dashboard, you press **Approve this device**, done.
+If you belong to an organization, the approval page lets you pick which account
+the device uses (the org — billed to its shared plan — or your personal one);
+it defaults to the org. The key is named after this device, so re-authorizing
+the same machine replaces its key instead of piling up.
 (Manual alternative: `leeway login --key lwllm_…` — handy for CI and self-host.)
 
 Leeway's own flags go **between** `launch` and the target; everything after the target is forwarded verbatim:

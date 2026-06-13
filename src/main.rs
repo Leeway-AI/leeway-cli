@@ -40,6 +40,9 @@ fn cmd_auth(gateway: Option<String>, auth: Option<AuthChoice>) -> Result<()> {
     let gateway = gateway.unwrap_or_else(|| cfg.gateway());
 
     let flow = api::cli_auth_start(&gateway, Duration::from_secs(10))?;
+    // stable per-machine id → the gateway names the key after this device, so a
+    // later re-auth here replaces it instead of stacking up orphan keys
+    let device = config::device_id().unwrap_or_default();
     println!("Confirm this code in your browser:  {}", flow.code);
     println!("{}", flow.verify_url);
     if open_browser(&flow.verify_url).is_err() {
@@ -57,7 +60,7 @@ fn cmd_auth(gateway: Option<String>, auth: Option<AuthChoice>) -> Result<()> {
         std::thread::sleep(Duration::from_secs(flow.interval_sec.max(1)));
         print!(".");
         std::io::stdout().flush().ok();
-        match api::cli_auth_poll(&gateway, &flow.code, &flow.secret, Duration::from_secs(10))? {
+        match api::cli_auth_poll(&gateway, &flow.code, &flow.secret, &device, Duration::from_secs(10))? {
             api::CliAuthPoll::Pending => continue,
             api::CliAuthPoll::Approved { api_key } => break api_key,
         }
@@ -236,7 +239,7 @@ fn cmd_launch(args: LaunchArgs) -> Result<i32> {
         .session
         .clone()
         .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
-    // plan seat accounting (Pro 1, Max 10 simultaneous devices) — fail-open:
+    // plan seat accounting (Pro 1, Max 5 simultaneous devices) — fail-open:
     // an unwritable config dir just means the device stays unidentified
     let device = config::device_id().unwrap_or_default();
 

@@ -149,12 +149,15 @@ pub fn cli_auth_poll(
     gateway: &str,
     code: &str,
     secret: &str,
+    device: &str,
     timeout: Duration,
 ) -> Result<CliAuthPoll> {
     let url = format!("{}/app/api/cli/auth/poll", gateway.trim_end_matches('/'));
+    // `device` lets the gateway name the key leeway-cli-<device> so re-authing
+    // this machine replaces its key while other machines keep theirs.
     let res = client(timeout)?
         .post(url)
-        .json(&serde_json::json!({ "code": code, "secret": secret }))
+        .json(&serde_json::json!({ "code": code, "secret": secret, "device": device }))
         .send()
         .context("cannot reach the gateway — is it running?")?;
     let status = res.status();
