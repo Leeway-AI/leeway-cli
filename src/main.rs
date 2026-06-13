@@ -60,7 +60,13 @@ fn cmd_auth(gateway: Option<String>, auth: Option<AuthChoice>) -> Result<()> {
         std::thread::sleep(Duration::from_secs(flow.interval_sec.max(1)));
         print!(".");
         std::io::stdout().flush().ok();
-        match api::cli_auth_poll(&gateway, &flow.code, &flow.secret, &device, Duration::from_secs(10))? {
+        match api::cli_auth_poll(
+            &gateway,
+            &flow.code,
+            &flow.secret,
+            &device,
+            Duration::from_secs(10),
+        )? {
             api::CliAuthPoll::Pending => continue,
             api::CliAuthPoll::Approved { api_key } => break api_key,
         }
@@ -135,10 +141,16 @@ fn finish_login(
     let dashboard = config::dashboard_url(&gateway);
     match api::key_info(&gateway, &key, Duration::from_secs(10)) {
         Ok(info) => {
-            println!(
-                "✓ signed in — plan: {} · key: {}",
-                info.plan, info.masked_key
-            );
+            match &info.org {
+                Some(o) => println!(
+                    "✓ signed in to {} (org · {}) — plan: {} · key: {}",
+                    o.name, o.role, info.plan, info.masked_key
+                ),
+                None => println!(
+                    "✓ signed in — plan: {} · key: {}",
+                    info.plan, info.masked_key
+                ),
+            }
             if info.plan == "developer" {
                 match &info.trial {
                     Some(t) if t.active => println!(
@@ -469,7 +481,14 @@ fn cmd_status() -> Result<()> {
             .map(|k| api::key_info(&gateway, k, Duration::from_secs(5))),
     ) {
         (Some(_), Some(Ok(info))) => {
-            println!("account   plan {} · key {}", info.plan, info.masked_key);
+            let account = match &info.org {
+                Some(o) => format!("{} (org · {})", o.name, o.role),
+                None => "personal".to_string(),
+            };
+            println!(
+                "account   {account} · plan {} · key {}",
+                info.plan, info.masked_key
+            );
             match info.trial {
                 Some(t) => println!(
                     "trial     active={} remaining={} days_left={}",

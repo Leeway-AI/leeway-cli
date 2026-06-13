@@ -22,6 +22,14 @@ pub struct MonthInfo {
     pub actual_cost_usd: f64,
 }
 
+/// Present only when the key is scoped to an organization (the request bills
+/// the org's shared plan). Absent = a personal key.
+#[derive(Debug, Deserialize)]
+pub struct KeyOrg {
+    pub name: String,
+    pub role: String,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct KeyInfo {
     pub plan: String,
@@ -29,6 +37,8 @@ pub struct KeyInfo {
     pub byok_providers: Vec<String>,
     pub masked_key: String,
     pub month: MonthInfo,
+    #[serde(default)]
+    pub org: Option<KeyOrg>,
 }
 
 #[derive(Debug, Deserialize)]
