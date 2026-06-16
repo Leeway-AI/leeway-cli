@@ -153,12 +153,17 @@ fn finish_login(
             }
             if info.plan == "developer" {
                 match &info.trial {
+                    // operator-configured trial wall (self-host): show the countdown
                     Some(t) if t.active => println!(
-                        "  developer trial: {} requests / {} days left — upgrade for full access: {dashboard}/app/billing",
+                        "  developer trial: {} requests / {} days left — upgrade for higher limits: {dashboard}/app/billing",
                         t.remaining_requests, t.days_left
                     ),
-                    _ => println!(
-                        "  the developer plan has no gateway access left — upgrade at {dashboard}/app/billing"
+                    Some(_) => println!(
+                        "  developer trial used up — upgrade for gateway access: {dashboard}/app/billing"
+                    ),
+                    // free Developer tier (default): the CLI is included, rate-limited
+                    None => println!(
+                        "  developer plan — free tier, Leeway CLI included (rate-limited). Upgrade for higher limits: {dashboard}/app/billing"
                     ),
                 }
             }
@@ -494,8 +499,12 @@ fn cmd_status() -> Result<()> {
                     "trial     active={} remaining={} days_left={}",
                     t.active, t.remaining_requests, t.days_left
                 ),
+                None if info.plan == "developer" => {
+                    println!("trial     n/a (free developer tier — CLI included)")
+                }
                 None => println!("trial     n/a (paid plan)"),
             }
+
             println!(
                 "byok      {}",
                 if info.byok_providers.is_empty() {
