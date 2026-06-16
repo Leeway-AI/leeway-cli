@@ -1,15 +1,6 @@
-# leeway
+# LeewayLLM CLI
 
 Launch your coding agent through the [LeewayLLM](https://leewayai.app) gateway: **same model, same provider — minus the context your agent should never have sent.** Every request gets a receipt; your dashboard shows exactly what was measured.
-
-Example session summary:
-
-```
-$ leeway launch claude
-…
-Session: 142 requests · direct est $3.81 → leeway $0.97 · saved $2.84 (−74%)
-details: https://leewayai.app/app/usage
-```
 
 ## Install
 
@@ -38,6 +29,15 @@ Leeway's own flags go **between** `launch` and the target; everything after the 
 
 ```sh
 leeway launch --mode aggressive --session my-task claude --resume abc
+```
+
+Example session summary:
+
+```
+$ leeway launch claude
+…
+Session: 142 requests · direct est $3.81 → leeway $0.97 · saved $2.84 (−74%)
+details: https://leewayai.app/app/usage
 ```
 
 ## The two modes
