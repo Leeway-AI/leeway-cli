@@ -5,9 +5,9 @@ Launch your coding agent through the [LeewayLLM](https://leewayai.app) gateway: 
 ## Install
 
 ```sh
+irm https://leewayai.app/install.ps1 | iex               # Windows (PowerShell)
 curl -fsSL https://leewayai.app/install.sh | bash        # macOS / Linux
 brew install leeway-ai/tap/leeway                        # Homebrew
-irm https://leewayai.app/install.ps1 | iex               # Windows (PowerShell)
 ```
 
 ## Quickstart
