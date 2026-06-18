@@ -86,7 +86,7 @@ Trade-off in one line: *managed = real savings & receipts, server-side; subscrip
 ```toml
 gateway_url = "https://api.leewayai.app"
 api_key = "lwllm_…"
-default_mode = "safe"
+default_mode = "balanced"   # off | safe | balanced | aggressive — default is balanced
 default_auth = "managed"
 subscription_ack = false
 auto_update = false   # true = self-update automatically when your gateway advertises a new release

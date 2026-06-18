@@ -82,7 +82,7 @@ pub struct LaunchArgs {
     /// managed | subscription (default: config; asked once on a TTY)
     #[arg(long, value_enum)]
     pub auth: Option<AuthChoice>,
-    /// off | safe | balanced | aggressive (default: config, else safe)
+    /// off | safe | balanced | aggressive (default: config, else balanced)
     #[arg(long)]
     pub mode: Option<String>,
     /// Session id for grouped savings (default: a fresh UUID per launch)

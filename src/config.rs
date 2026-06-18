@@ -52,10 +52,15 @@ impl Config {
             .unwrap_or_else(|| DEFAULT_GATEWAY.to_string())
     }
     pub fn mode(&self) -> String {
-        // safe = the zero-quality-risk mode — the only acceptable default
+        // balanced = the cache-safe sweet spot for coding agents: it actually
+        // removes tokens from fresh tool output (trim / strip-base64 /
+        // compress-dom) while the content-pure stages keep the agent's prompt
+        // cache stable. aggressive is deliberately NOT the default — its
+        // prune-history / diff-tool-results shift the cached prefix every turn
+        // (the gateway also guards against this when cache_control is present).
         self.default_mode
             .clone()
-            .unwrap_or_else(|| "safe".to_string())
+            .unwrap_or_else(|| "balanced".to_string())
     }
 }
 
@@ -196,7 +201,7 @@ mod tests {
         let empty = load_from(dir.path()).unwrap();
         assert!(empty.api_key.is_none());
         assert_eq!(empty.gateway(), DEFAULT_GATEWAY);
-        assert_eq!(empty.mode(), "safe");
+        assert_eq!(empty.mode(), "balanced");
         assert!(!empty.subscription_ack);
 
         let cfg = Config {
